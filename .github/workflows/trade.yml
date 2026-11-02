@@ -1,0 +1,30 @@
+name: جلسه معامله
+
+on:
+  workflow_dispatch:
+    inputs:
+      minutes:
+        description: "مدت جلسه (دقیقه)"
+        default: "60"
+      dryrun:
+        description: "حالت آزمایشی؟ (yes = پول واقعی نمی‌زند)"
+        default: "yes"
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 75
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: نصب نیازمندی‌ها
+        run: pip install requests
+      - name: اجرای جلسه معامله
+        env:
+          TABDEAL_API_KEY: ${{ secrets.TABDEAL_API_KEY }}
+          TABDEAL_SECRET: ${{ secrets.TABDEAL_SECRET }}
+          RUN_MINUTES: ${{ github.event.inputs.minutes }}
+          DRY_RUN: ${{ github.event.inputs.dryrun == 'yes' && '1' || '0' }}
+        run: python trade_bot.py
